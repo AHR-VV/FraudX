@@ -1,0 +1,290 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"><meta content="mobile_tab" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{width:100%;margin:0;padding:0;background-color:#f8faf9;color:#191c1c;font-family:'Inter',sans-serif;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "on-secondary-fixed-variant": "#2e4d3d",
+          "on-primary-fixed": "#002109",
+          "primary-fixed": "#6bff8f",
+          "surface-tint": "#006e2f",
+          "primary-container": "#22c55e",
+          "tertiary-fixed-dim": "#a0d583",
+          "primary-fixed-dim": "#4ae176",
+          "inverse-surface": "#2e3131",
+          "on-error-container": "#93000a",
+          "on-secondary-fixed": "#002113",
+          "outline-variant": "#bccbb9",
+          "on-error": "#ffffff",
+          "on-secondary-container": "#4b6b59",
+          "error-container": "#ffdad6",
+          "tertiary-fixed": "#bbf29d",
+          "on-tertiary-container": "#1c4a07",
+          "on-tertiary-fixed-variant": "#23510e",
+          "inverse-on-surface": "#eff1f0",
+          "surface-container-low": "#f2f4f3",
+          "tertiary-container": "#86ba6b",
+          "on-surface-variant": "#3d4a3d",
+          "on-primary": "#ffffff",
+          "on-primary-container": "#004b1e",
+          "on-secondary": "#ffffff",
+          "surface": "#f8faf9",
+          "on-tertiary-fixed": "#062100",
+          "on-primary-fixed-variant": "#005321",
+          "surface-container-high": "#e6e9e8",
+          "surface-bright": "#f8faf9",
+          "secondary": "#456554",
+          "on-tertiary": "#ffffff",
+          "secondary-container": "#c7ebd4",
+          "on-background": "#191c1c",
+          "inverse-primary": "#4ae176",
+          "surface-container-highest": "#e1e3e2",
+          "surface-variant": "#e1e3e2",
+          "secondary-fixed-dim": "#abcfb9",
+          "background": "#f8faf9",
+          "error": "#ba1a1a",
+          "surface-container-lowest": "#ffffff",
+          "outline": "#6d7b6c",
+          "surface-dim": "#d8dada",
+          "tertiary": "#3b6925",
+          "secondary-fixed": "#c7ebd4",
+          "primary": "#006e2f",
+          "surface-container": "#eceeed",
+          "on-surface": "#191c1c"
+        },
+        borderRadius: {
+          "DEFAULT": "1rem",
+          "lg": "1.5rem",
+          "xl": "2rem",
+          "full": "9999px"
+        },
+        spacing: {
+          "space-lg": "1.5rem",
+          "margin": "1.25rem",
+          "gutter-mobile": "0.75rem",
+          "space-xl": "2rem",
+          "space-sm": "0.5rem",
+          "gutter": "1rem",
+          "space-xs": "0.25rem",
+          "space-md": "1rem",
+          "margin-mobile": "1.25rem"
+        },
+        fontFamily: {
+          "body-md": ["Inter", "sans-serif"],
+          "body-lg": ["Inter", "sans-serif"],
+          "body-sm": ["Inter", "sans-serif"],
+          "headline-sm": ["Plus Jakarta Sans", "sans-serif"],
+          "headline-md": ["Plus Jakarta Sans", "sans-serif"],
+          "headline-lg": ["Plus Jakarta Sans", "sans-serif"],
+          "label-sm": ["Inter", "sans-serif"],
+          "label-md": ["Inter", "sans-serif"],
+          "label-lg": ["Inter", "sans-serif"]
+        },
+        fontSize: {
+          "body-md": ["14px", { lineHeight: "20px", letterSpacing: "0em", fontWeight: "400" }],
+          "headline-md": ["20px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "700" }],
+          "headline-sm": ["16px", { lineHeight: "24px", letterSpacing: "0em", fontWeight: "600" }],
+          "headline-lg": ["28px", { lineHeight: "36px", letterSpacing: "-0.02em", fontWeight: "700" }],
+          "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.02em", fontWeight: "600" }],
+          "label-lg": ["14px", { lineHeight: "20px", letterSpacing: "0.01em", fontWeight: "600" }],
+          "body-lg": ["16px", { lineHeight: "24px", letterSpacing: "-0.01em", fontWeight: "400" }],
+          "label-sm": ["11px", { lineHeight: "14px", letterSpacing: "0.04em", fontWeight: "600" }],
+          "body-sm": ["12px", { lineHeight: "16px", letterSpacing: "0.01em", fontWeight: "400" }]
+        }
+      }
+    }
+  };
+</script></head><body class="bg-surface font-body-md text-on-surface antialiased flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-xl border-b border-surface-container pt-safe shadow-[0_1px_3px_rgba(0,0,0,0.03)]"><div class="h-16 px-gutter flex items-center justify-between"><div class="flex items-center gap-space-sm"><a class="w-10 h-10 flex items-center justify-center text-[#191c1c] hover:text-primary transition-colors rounded-full" data-path="settings" href="#"><span class="material-symbols-outlined text-[24px]">settings</span></a><div class="flex items-center gap-space-xs"><span aria-label="fraudX logo" class="text-[22px] leading-none shrink-0 select-none">🛡️</span><div class="flex flex-col"><span class="font-bold text-[18px] tracking-tight text-[#14231b]"><span class="text-[#14231b]">Fraud</span><span class="text-[#15803d]">X</span></span><span class="font-label-sm text-[10px] text-outline -mt-1 tracking-widest uppercase font-bold">Dashboard</span></div></div></div><div class="w-9 h-9 rounded-full bg-surface-container-high border border-outline-variant/40 flex items-center justify-center shrink-0 shadow-sm"><span class="material-symbols-outlined text-secondary text-[20px]">person</span></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-24 bg-surface"><div class="flex flex-col w-full px-margin pb-space-lg select-none">
+<!-- Status Chip & Live Telemetry -->
+<div class="flex items-center justify-between pt-space-sm pb-space-xs">
+<div class="flex items-center gap-space-xs px-3 py-1 rounded-full bg-secondary-container/70 border border-secondary/20 text-on-secondary-fixed-variant">
+<span class="w-2 h-2 rounded-full bg-[#16a34a] animate-pulse"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-[#0f5328] font-bold">Live Perimeter: Active</span>
+</div>
+<div class="flex items-center gap-1.5 text-outline font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px] text-primary">verified_user</span>
+<span class="font-medium">v4.19 SEC-NET</span>
+</div>
+</div>
+<!-- Master Shield Power ON Toggle Area (Reference Image Exact Match) -->
+<div class="flex flex-col items-center justify-center my-space-lg">
+<div class="relative flex items-center justify-center">
+<!-- Glow Aura -->
+<div class="absolute w-56 h-56 rounded-full bg-[#4ade80]/20 blur-2xl pointer-events-none transition-all duration-700" id="shield-aura"></div>
+<!-- Concentric Decorative Outer Ring -->
+<div class="w-56 h-56 rounded-full border-[10px] border-[#34d399]/40 flex items-center justify-center p-2.5 transition-all duration-500 shadow-[0_4px_24px_rgba(52,211,153,0.25)]" id="outer-glow-ring">
+<!-- Interactive Circular Toggle Inner Core -->
+<button aria-label="Toggle Protection State" class="relative z-10 w-full h-full rounded-full flex flex-col items-center justify-center bg-[#1e4635] text-white transition-all active:scale-95 cursor-pointer shadow-md focus:outline-none" id="toggle-master-btn" onclick="toggleProtection()" style="animation-delay: 48ms;">
+<span class="font-headline-lg text-[42px] leading-none font-extrabold tracking-tight text-white transition-colors" id="ring-status-label" style="animation-delay: 70ms;">ON</span>
+
+</button>
+</div>
+</div>
+<!-- Status Headline & Subtext -->
+<div class="flex flex-col items-center text-center mt- space-md">
+<h2 class="font-headline-md text-[20px] font-bold text-[#14231b] tracking-tight transition-colors mt-3" id="shield-headline" style="animation-delay: 120ms;">Protection enabled</h2>
+<p class="font-body-sm text-[13px] text-outline mt-0.5 flex items-center gap-1" id="shield-subline"><span>Tap to turn off</span></p>
+</div>
+</div>
+<!-- Daily Intercepts / Telemetry Metrics Grid -->
+<div class="grid grid-cols-2 gap-space-sm mb-space-lg">
+
+
+</div>
+<!-- Suspicious Verification Prompt & Reference CTA Pill Card -->
+<div class="flex flex-col gap-2.5 mb-space-lg">
+<h3 class="font-headline-sm text-[17px] font-bold text-[#14231b] tracking-tight">
+  Something look suspicious?
+</h3>
+<!-- Soft Pastel Lime/Mint Pill CTA matched to Reference Image -->
+<button class="w-full flex items-center justify-between px-5 py-4 rounded-xl bg-[#cbf2a2] hover:bg-[#c2ed96] text-[#143021] font-headline-sm font-bold shadow-[0_2px_10px_rgba(75,120,40,0.08)] active:scale-[0.98] transition-all group" onclick="openInspectorModal()" type="button">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="material-symbols-outlined text-[22px] shrink-0 text-[#143021] group-hover:rotate-45 transition-transform font-semibold">link</span>
+<span class="truncate font-headline-sm text-[16px] font-bold text-[#143021]">Check a link or message</span>
+</div>
+<span class="material-symbols-outlined text-[22px] text-[#143021] shrink-0 group-hover:translate-x-1 transition-transform font-semibold">arrow_forward</span>
+</button>
+</div>
+<!-- Real-Time Threat Activity Snippet -->
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-lg text-label-lg text-on-surface font-bold">Recent Interceptions</span>
+<span class="font-label-sm text-label-sm text-primary font-bold uppercase cursor-pointer hover:underline">View full log</span>
+</div>
+<!-- Intercept Item 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md flex items-center justify-between gap-space-sm border border-surface-container-high shadow-[0_2px_8px_rgba(0,0,0,0.03)]">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-9 h-9 rounded-lg bg-error-container/50 text-error flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px] text-error">gpp_bad</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-label-md text-label-md text-on-surface font-bold truncate">secure-banking-login.xyz</span>
+<span class="px-1.5 py-0.5 rounded text-[10px] bg-error text-on-error font-bold leading-none">BLOCKED</span>
+</div>
+<span class="font-body-sm text-body-sm text-outline truncate">SMS credential phishing decoy</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-outline shrink-0">12m ago</span>
+</div>
+<!-- Intercept Item 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md flex items-center justify-between gap-space-sm border border-surface-container-high shadow-[0_2px_8px_rgba(0,0,0,0.03)]">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-9 h-9 rounded-lg bg-secondary-container/60 text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px] text-primary">security_update_good</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-label-md text-label-md text-on-surface font-bold truncate">FedEx Delivery Tracking #91</span>
+<span class="px-1.5 py-0.5 rounded text-[10px] bg-secondary-container text-on-secondary-fixed-variant font-bold leading-none">CLEARED</span>
+</div>
+<span class="font-body-sm text-body-sm text-outline truncate">Genuine postal webhook</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-outline shrink-0">1h ago</span>
+</div>
+</div>
+<!-- Interactive Inspector Slide-up Overlay Modal -->
+<div aria-modal="true" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden flex-col justify-end p-gutter transition-opacity duration-300" id="inspector-modal" role="dialog">
+<div class="w-full bg-white rounded-xl p-space-md shadow-2xl border border-surface-container-high flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[22px]">find_in_page</span>
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">Inspect Unknown Payload</span>
+</div>
+<button class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-outline hover:text-on-surface" onclick="closeInspectorModal()" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<p class="font-body-md text-body-md text-outline">
+  Paste any suspicious text message, unfamiliar URL, or sender handle to simulate isolation before opening.
+</p>
+<div class="relative w-full">
+<input class="w-full h-12 bg-surface-container-low text-on-surface px-space-md rounded-lg font-body-md text-body-md placeholder:text-outline border border-surface-container-highest focus:outline-none focus:ring-2 focus:ring-primary/40" id="inspect-input" placeholder="https://... or paste raw text message" type="text">
+</div>
+<div class="flex gap-space-sm">
+<button class="flex-1 h-12 rounded-lg bg-primary hover:bg-[#005e27] text-white font-headline-sm text-headline-sm font-bold flex items-center justify-center gap-2 active:opacity-90 transition-opacity shadow-sm" id="inspect-btn" onclick="runScanSimulation()" type="button">
+<span class="material-symbols-outlined text-[20px]">policy</span>
+<span>Deep Scan</span>
+</button>
+</div>
+<div class="hidden p-3 rounded-lg bg-surface-container-low font-label-md text-label-md text-primary items-center gap-2" id="scan-feedback">
+<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span>
+<span>Cross-referencing threat heuristics...</span>
+</div>
+</div>
+</div>
+</div>
+<script>
+  let isProtectionActive = true;
+
+  function toggleProtection() {
+    isProtectionActive = !isProtectionActive;
+
+    const aura = document.getElementById('shield-aura');
+    const outerGlowRing = document.getElementById('outer-glow-ring');
+    const masterBtn = document.getElementById('toggle-master-btn');
+    const statusLabel = document.getElementById('ring-status-label');
+    const dotIndicator = document.getElementById('ring-dot-indicator');
+    const headline = document.getElementById('shield-headline');
+    const subline = document.getElementById('shield-subline');
+
+    if (isProtectionActive) {
+      // ON STATE
+      aura.className = 'absolute w-56 h-56 rounded-full bg-[#4ade80]/20 blur-2xl pointer-events-none transition-all duration-700';
+      outerGlowRing.className = 'w-56 h-56 rounded-full border-[10px] border-[#34d399]/40 flex items-center justify-center p-2.5 transition-all duration-500 shadow-[0_4px_24px_rgba(52,211,153,0.25)]';
+      masterBtn.className = 'relative z-10 w-full h-full rounded-full flex flex-col items-center justify-center bg-[#1e4635] text-white transition-all active:scale-95 cursor-pointer shadow-md focus:outline-none';
+      statusLabel.textContent = 'ON';
+      statusLabel.className = 'font-headline-lg text-[42px] leading-none font-extrabold tracking-tight text-white transition-colors';
+      dotIndicator.className = 'w-1.5 h-1.5 rounded-full bg-[#4ade80] mt-1.5 shadow-[0_0_8px_#4ade80]';
+      headline.textContent = 'Protection enabled';
+      headline.className = 'font-headline-md text-[20px] font-bold text-[#14231b] tracking-tight transition-colors mt-3';
+      subline.innerHTML = '<span>Tap to turn off</span>';
+    } else {
+      // OFF STATE
+      aura.className = 'absolute w-56 h-56 rounded-full bg-error/15 blur-2xl pointer-events-none transition-all duration-700';
+      outerGlowRing.className = 'w-56 h-56 rounded-full border-[10px] border-error/30 flex items-center justify-center p-2.5 transition-all duration-500 shadow-[0_4px_24px_rgba(186,26,26,0.15)]';
+      masterBtn.className = 'relative z-10 w-full h-full rounded-full flex flex-col items-center justify-center bg-[#7f1d1d] text-white transition-all active:scale-95 cursor-pointer shadow-md focus:outline-none';
+      statusLabel.textContent = 'OFF';
+      statusLabel.className = 'font-headline-lg text-[42px] leading-none font-extrabold tracking-tight text-white transition-colors';
+      dotIndicator.className = 'w-1.5 h-1.5 rounded-full bg-[#fca5a5] mt-1.5';
+      headline.textContent = 'Protection disabled';
+      headline.className = 'font-headline-md text-[20px] font-bold text-error tracking-tight transition-colors mt-3';
+      subline.innerHTML = '<span>Tap to activate perimeter</span>';
+    }
+  }
+
+  function openInspectorModal() {
+    const modal = document.getElementById('inspector-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    const input = document.getElementById('inspect-input');
+    if (input) input.focus();
+  }
+
+  function closeInspectorModal() {
+    const modal = document.getElementById('inspector-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    const feedback = document.getElementById('scan-feedback');
+    feedback.classList.add('hidden');
+    feedback.classList.remove('flex');
+  }
+
+  function runScanSimulation() {
+    const feedback = document.getElementById('scan-feedback');
+    const input = document.getElementById('inspect-input');
+    feedback.classList.remove('hidden');
+    feedback.classList.add('flex');
+    feedback.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin text-primary">sync</span><span>Analyzing target heuristics...</span>';
+    
+    setTimeout(() => {
+      feedback.innerHTML = '<span class="material-symbols-outlined text-[18px] text-primary">check_circle</span><span class="text-on-surface">Target isolated. No malicious redirect vectors found!</span>';
+      if (input) input.value = '';
+    }, 1200);
+  }
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-white/95 backdrop-blur-xl border-t border-surface-container shadow-[0_-2px_12px_rgba(0,0,0,0.04)]" data-active-classes="text-primary font-bold"></nav>
+
+
+
+</body></html>

@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">FraudX</string>
+    <string name="dashboard_subtitle">DASHBOARD</string>
+    <string name="settings_subtitle">Settings</string>
+    <string name="log_subtitle">Interception Log</string>
+</resources>

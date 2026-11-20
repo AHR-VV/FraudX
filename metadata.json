@@ -1,0 +1,6 @@
+{
+  "name": "FraudX — Verdant Shield Android UI",
+  "description": "Native Kotlin Jetpack Compose Android UI and interactive mobile preview for FraudX perimeter protection, module controls, payload scanning, manual allow/block rules, and full interception logs, complete with backend handoff documentation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
