@@ -121,6 +121,7 @@ fun FraudXNavHost(
                         onChangeDbFrequency = { viewModel.updateDbFrequency(it) },
                         onSyncThreatDb = { viewModel.syncThreatDatabase() },
                         onTogglePushAlerts = { viewModel.setInstantPushAlerts(it) },
+                        onToggleVoiceAssistance = { viewModel.setVoiceAssistance(it) },
                         onOpenAllowBlock = { navController.navigate(FraudXRoutes.ALLOW_BLOCK) }
                     )
                 }

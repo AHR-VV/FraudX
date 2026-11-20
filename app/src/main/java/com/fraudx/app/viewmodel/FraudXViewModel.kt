@@ -123,6 +123,12 @@ class FraudXViewModel(
         }
     }
 
+    fun setVoiceAssistance(enabled: Boolean) {
+        viewModelScope.launch {
+            repository.setVoiceAssistance(enabled)
+        }
+    }
+
     fun inspectPayload(rawPayload: String) {
         if (rawPayload.isBlank() || isScanningPayload.value) return
         viewModelScope.launch {

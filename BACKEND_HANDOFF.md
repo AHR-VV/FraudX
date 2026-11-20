@@ -29,6 +29,7 @@ DashboardScreen (ON / OFF)
  │                                 ├── Primary Intercept Modules (Website, SMS, Call)
  │                                 ├── Threat Database Updates (Daily/Weekly/Monthly + Sync)
  │                                 ├── Instant Push Alerts Switch
+ │                                 ├── Voice Assistance Switch
  │                                 └── [Manage >] ──▶ AllowBlockScreen
  │                                                      ├── Allowed / Blocked Segmented Tabs
  │                                                      ├── Inject New Rule (L3-FILTER)
@@ -82,6 +83,7 @@ All network payloads map directly to `@Serializable` types in `FraudXModels.kt`:
   "dbUpdateFrequency": "DAILY",
   "lastDbSyncLabel": "Today at 04:15 AM (via WiFi)",
   "instantPushAlerts": true,
+  "voiceAssistance": true,
   "engineVersion": "v4.19 SEC-NET",
   "buildStamp": "v4.8.2-SECURE",
   "policyStamp": "ESTAB-2025.04"
@@ -162,7 +164,7 @@ All endpoints expect `Authorization: Bearer <token>` and `Content-Type: applicat
 | `GET /v1/protection` | `observeProtectionState()` | — | `ProtectionState` |
 | `PATCH /v1/protection/master` | `toggleMasterShield()` | `{ "enabled": boolean }` | `ProtectionState` |
 | `PATCH /v1/protection/modules` | `toggleModule(module)` | `{ "module": "WEBSITE"\|"SMS"\|"CALL", "enabled": boolean }` | `ProtectionState` |
-| `PATCH /v1/protection/preferences` | `updateDbFrequency()` / `setInstantPushAlerts()` | `{ "dbUpdateFrequency"?: string, "instantPushAlerts"?: boolean }` | `ProtectionState` |
+| `PATCH /v1/protection/preferences` | `updateDbFrequency()` / `setInstantPushAlerts()` / `setVoiceAssistance()` | `{ "dbUpdateFrequency"?: string, "instantPushAlerts"?: boolean, "voiceAssistance"?: boolean }` | `ProtectionState` |
 | `POST /v1/protection/sync` | `syncThreatDatabase()` | `{}` | `{ "protection": ProtectionState, "signaturesUpdated": number }` |
 | `POST /v1/inspect` | `inspectPayload(rawPayload)` | `{ "payload": string }` | `ScanVerdict` |
 | `GET /v1/rules` | `observeRules()` | Query: `?action=&category=&q=` | `{ "items": ManualRule[] }` |
@@ -214,6 +216,7 @@ Connect each Settings module toggle to its real Android OS runtime hook:
 - **Call Protection** (`ProtectionModule.CALL`): Register an Android `CallScreeningService` (`android.permission.BIND_SCREENING_SERVICE`) checking `ManualRule` allowlist bypasses first, then blocklist/honeynet reputation to return `CallResponse.Builder().setDisallowCall(true).setSilenceCall(true)`.
 - **Threat Database Updates** (`dbUpdateFrequency`): Schedule a `PeriodicWorkRequest` via **WorkManager** (`1 day` / `7 days` / `30 days`) with `NetworkType.UNMETERED` (WiFi constraint) calling `syncThreatDatabase()`.
 - **Instant Push Alerts** (`instantPushAlerts`): Register a **Firebase Cloud Messaging** (`FirebaseMessagingService`) token and toggle the high-priority `fraudx_breach_alerts` notification channel.
+- **Voice Assistance** (`voiceAssistance`): Toggle Android `TextToSpeech` (or spoken audio alert playback via `AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY` / `USAGE_NOTIFICATION_EVENT`) to deliver real-time spoken threat warnings and call/SMS guidance when incoming threats are intercepted.
 
 ---
 

@@ -35,6 +35,7 @@ import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.outlined.NotificationsActive
 import androidx.compose.material.icons.outlined.PhoneInTalk
 import androidx.compose.material.icons.outlined.Public
@@ -85,6 +86,7 @@ fun SettingsScreen(
     onChangeDbFrequency: (DbUpdateFrequency) -> Unit,
     onSyncThreatDb: () -> Unit,
     onTogglePushAlerts: (Boolean) -> Unit,
+    onToggleVoiceAssistance: (Boolean) -> Unit,
     onOpenAllowBlock: () -> Unit
 ) {
     val protection = uiState.protection
@@ -249,6 +251,45 @@ fun SettingsScreen(
                             FraudXSwitch(
                                 checked = protection.instantPushAlerts,
                                 onCheckedChange = onTogglePushAlerts
+                            )
+                        }
+
+                        HorizontalDivider(color = VerdantColors.BorderHairline, thickness = 1.dp)
+
+                        // Voice Assistance Row
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                PreferenceLeadingIcon(Icons.Outlined.Mic)
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Voice Assistance",
+                                        fontFamily = PlusJakartaSansFamily,
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontSize = 15.sp,
+                                        color = VerdantColors.DeepForestInk,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Text(
+                                        text = "Real-time audio alerts and guidance for incoming threat warnings",
+                                        fontSize = 12.sp,
+                                        color = VerdantColors.OnSurfaceVariant
+                                    )
+                                }
+                            }
+                            FraudXSwitch(
+                                checked = protection.voiceAssistance,
+                                onCheckedChange = onToggleVoiceAssistance
                             )
                         }
 

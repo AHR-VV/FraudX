@@ -70,6 +70,7 @@ data class ProtectionState(
     val dbUpdateFrequency: DbUpdateFrequency = DbUpdateFrequency.DAILY,
     val lastDbSyncLabel: String = "Today at 04:15 AM (via WiFi)",
     val instantPushAlerts: Boolean = true,
+    val voiceAssistance: Boolean = true,
     val engineVersion: String = "v4.19 SEC-NET",
     val buildStamp: String = "v4.8.2-SECURE",
     val policyStamp: String = "ESTAB-2025.04"

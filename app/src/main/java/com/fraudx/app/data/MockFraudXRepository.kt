@@ -264,6 +264,15 @@ class MockFraudXRepository : FraudXRepository {
         return updated
     }
 
+    override suspend fun setVoiceAssistance(enabled: Boolean): ProtectionState {
+        lateinit var updated: ProtectionState
+        protectionFlow.update { current ->
+            updated = current.copy(voiceAssistance = enabled)
+            updated
+        }
+        return updated
+    }
+
     override suspend fun inspectPayload(rawPayload: String): ScanVerdict {
         delay(900)
         val trimmed = rawPayload.trim()

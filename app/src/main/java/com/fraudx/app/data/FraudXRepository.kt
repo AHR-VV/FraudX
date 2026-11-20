@@ -54,6 +54,9 @@ interface FraudXRepository {
     /** Toggles high-priority breach push notifications. */
     suspend fun setInstantPushAlerts(enabled: Boolean): ProtectionState
 
+    /** Toggles real-time audio alerts and voice guidance for incoming threat warnings. */
+    suspend fun setVoiceAssistance(enabled: Boolean): ProtectionState
+
     /**
      * Evaluates an unknown URL, SMS snippet, or phone number and returns a structured
      * heuristic verdict (SAFE, SUSPICIOUS, or MALICIOUS).
