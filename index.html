@@ -1,33 +1,128 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>FraudX — Verdant Shield Android UI</title>
-    <meta
-      name="description"
-      content="Native Kotlin Jetpack Compose Android UI and interactive mobile preview for FraudX perimeter protection, module controls, payload scanning, manual allow/block rules, and full interception logs."
-    />
-    <meta property="og:title" content="FraudX — Verdant Shield Android UI" />
-    <meta
-      property="og:description"
-      content="Native Kotlin Jetpack Compose Android UI and interactive mobile preview for FraudX perimeter protection, module controls, payload scanning, manual allow/block rules, and full interception logs."
-    />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
-      rel="stylesheet"
-    />
-  </head>
-  <body class="bg-[#eef3f0] text-[#191c1c] antialiased">
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FraudX Voice Assistant</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app">
+        <header>
+            <div class="logo">🛡️ FraudX</div>
+            <span class="tag">VOICE PROTECTION</span>
+        </header>
+
+        <main>
+            <section class="hero">
+                <div class="badge">AI SAFETY COMPANION</div>
+
+                <h1>Your safety.<br>
+                    <span>Your voice alert.</span>
+                </h1>
+
+                <p>
+                    FraudX speaks up when something seems suspicious.
+                    Test your voice protection system below.
+                </p>
+            </section>
+
+            <section class="voice-card">
+
+                <div class="orb" id="orb">
+                    <span class="mic">🔊</span>
+                </div>
+
+                <h2 id="voiceStatus">Voice assistant ready</h2>
+
+                <p id="statusMessage">
+                    Select an alert to hear FraudX speak.
+                </p>
+                <div class="voice-settings">
+    <label for="voiceSelect">🌐 Choose Voice Language</label>
+
+    <select id="voiceSelect">
+        <option value="">Loading voices...</option>
+    </select>
+
+    <button class="secondary" onclick="testSelectedVoice()">
+        🔊 Test Selected Voice
+    </button>
+</div>
+
+                <div class="wave" id="wave">
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                </div>
+
+                <div class="buttons">
+
+                    <button class="danger"
+                        onclick="warnScam()">
+                        📞 Scam Number Alert
+                    </button>
+
+                    <button class="warning"
+                        onclick="warnLink()">
+                        🔗 Suspicious Link Alert
+                    </button>
+
+                    <button class="safe"
+                        onclick="announceSafe()">
+                        ✅ Safe Link
+                    </button>
+
+                    <button class="secondary"
+                        onclick="testVoice()">
+                        ▶ Test Voice
+                    </button>
+
+                    <button class="stop"
+                        onclick="stopVoice()">
+                        ■ Stop Voice
+                    </button>
+
+                </div>
+
+            </section>
+
+            <section class="info">
+                <div class="info-item">
+                    <span>📞</span>
+                    <div>
+                        <h3>Call Protection</h3>
+                        <p>Hear warnings about reported scam numbers.</p>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <span>🔗</span>
+                    <div>
+                        <h3>Link Protection</h3>
+                        <p>Get spoken alerts about suspicious links.</p>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <span>🌐</span>
+                    <div>
+                        <h3>Website Protection</h3>
+                        <p>Listen to safety warnings before browsing.</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer>
+            <p>FraudX • Stay alert. Stay protected.</p>
+        </footer>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
 </html>
