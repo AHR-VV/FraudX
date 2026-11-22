@@ -1,0 +1,10 @@
+package com.fraudx.app.websiteprotection.models
+
+data class ThreatEvidenceSummary(
+    val totalIndicators: Int,
+    val criticalIndicators: Int,
+    val highIndicators: Int,
+    val mediumIndicators: Int,
+    val lowIndicators: Int,
+    val averageConfidence: Float
+)
