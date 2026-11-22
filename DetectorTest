@@ -1,0 +1,307 @@
+package linkshield
+
+import java.io.IOException
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
+
+/** Fake network layer so no test ever touches the internet. */
+private class FakeHttp(
+    private val reply: HttpReply? = null,
+    private val error: IOException? = null,
+) : VtHttp {
+    override fun get(url: String, apiKey: String, timeoutSec: Long): HttpReply {
+        error?.let { throw it }
+        return reply!!
+    }
+}
+
+private fun vtBody(malicious: Int, suspicious: Int, harmless: Int, undetected: Int) =
+    """{"data":{"attributes":{"last_analysis_stats":""" +
+        """{"malicious":$malicious,"suspicious":$suspicious,"harmless":$harmless,"undetected":$undetected}}}}"""
+
+private val analyzer = UrlAnalyzer()
+
+private fun scan(url: String, a: UrlAnalyzer = analyzer): ScanResult = a.analyze(url, useThreatIntel = false)
+private fun ids(r: ScanResult): Set<String> = r.findings.map { it.ruleId }.toSet()
+
+class InputValidationTest {
+    @Test
+    fun emptyAndNullInputRejected() {
+        for (bad in listOf("", "   ", null)) {
+            assertFailsWith<InvalidUrlException> { analyzer.analyze(bad, useThreatIntel = false) }
+        }
+    }
+
+    @Test
+    fun invalidInputsRejected() {
+        for (bad in listOf(
+            "http://exa mple.com",            // space
+            "hello",                          // no dot
+            "mailto://someone@example.com",   // unsupported scheme
+            "http://[abc/",                   // malformed IPv6
+            "http://exa..mple.com",           // empty label
+            "http://example.com:99999",       // port out of range
+            "http://example.com:abc",         // bad port
+            "http://a.com/" + "x".repeat(3000), // too long
+        )) {
+            assertFailsWith<InvalidUrlException>(bad.take(30)) { scan(bad) }
+        }
+    }
+
+    @Test
+    fun missingSchemeAssumedHttp() {
+        val r = scan("example.com/path")
+        assertTrue(r.normalizedUrl.startsWith("http://"))
+        assertTrue("no_https" in ids(r))
+    }
+
+    @Test
+    fun hostWithPortButNoScheme() {
+        assertTrue("non_standard_port" in ids(scan("example.com:8080/x")))
+    }
+}
+
+class RuleTest {
+    @Test
+    fun ipAddresses() {
+        assertTrue("ip_address" in ids(scan("http://192.168.10.5/login")))
+        assertTrue("ip_address" in ids(scan("http://[2001:db8::1]/")))
+    }
+
+    @Test
+    fun obfuscatedIp() {
+        assertTrue("obfuscated_ip" in ids(scan("http://3232235777/")))
+        assertTrue("obfuscated_ip" in ids(scan("http://0xC0A80001/")))
+    }
+
+    @Test
+    fun httpsRule() {
+        assertTrue("no_https" in ids(scan("http://example.com")))
+        assertFalse("no_https" in ids(scan("https://example.com")))
+    }
+
+    @Test
+    fun longUrlTiers() {
+        val base = "https://example.com/"
+        assertTrue("long_url" in ids(scan(base + "a".repeat(60))))
+        assertTrue("very_long_url" in ids(scan(base + "a".repeat(110))))
+        assertTrue("extreme_url" in ids(scan(base + "a".repeat(190))))
+        assertFalse("long_url" in ids(scan("https://example.com/short")))
+    }
+
+    @Test
+    fun atSymbolAndHyphens() {
+        assertTrue("at_symbol" in ids(scan("https://www.google.com@evil-site.com/")))
+        assertTrue("many_hyphens" in ids(scan("https://a-b-c-d-e.com")))
+    }
+
+    @Test
+    fun subdomains() {
+        assertTrue("subdomains_excessive" in ids(scan("https://a.b.c.d.example.com")))
+        val ok = ids(scan("https://www.example.com")) + ids(scan("https://shop.example.co.uk"))
+        assertFalse(ok.any { it.startsWith("subdomains") })
+    }
+
+    @Test
+    fun shortenerPortTldKeywords() {
+        assertTrue("shortener" in ids(scan("https://bit.ly/3abcXYZ")))
+        assertTrue("non_standard_port" in ids(scan("https://example.com:8443")))
+        assertTrue("suspicious_tld" in ids(scan("https://example.xyz")))
+        val kw = scan("https://example.com/login/verify?password=1").findings.first { it.ruleId == "keywords" }
+        assertTrue("login" in kw.description && "verify" in kw.description && "password" in kw.description)
+    }
+
+    @Test
+    fun keywordPointsAreCapped() {
+        val kw = scan("https://example.com/login/verify/password/account/secure/update")
+            .findings.first { it.ruleId == "keywords" }
+        assertEquals(Defaults.weights.getValue("keyword_cap"), kw.points)
+    }
+
+    @Test
+    fun redirectAndExecutable() {
+        assertTrue("redirect_param" in ids(scan("https://example.com/r?url=https%3A%2F%2Fevil.com")))
+        assertTrue("executable_extension" in ids(scan("https://example.com/setup.exe")))
+    }
+
+    @Test
+    fun dangerousScheme() {
+        val r = analyzer.analyze("javascript:alert(1)", useThreatIntel = false)
+        assertEquals("High Risk", r.classification)
+        assertTrue("dangerous_scheme" in ids(r))
+    }
+}
+
+class BrandDetectionTest {
+    @Test
+    fun leetAndLookalikes() {
+        assertTrue("typosquat" in ids(scan("https://paypa1.com")))
+        assertTrue("typosquat" in ids(scan("https://g00gle.com")))
+        assertTrue("typosquat" in ids(scan("https://arnazon.com")))
+    }
+
+    @Test
+    fun fuzzyMisspellings() {
+        assertTrue("typosquat" in ids(scan("https://gooogle.com")))
+        assertTrue("typosquat" in ids(scan("https://paypall.com")))
+    }
+
+    @Test
+    fun brandInWrongDomain() {
+        assertTrue("brand_impersonation" in ids(scan("https://paypal-secure-login.com")))
+        assertTrue("brand_impersonation" in ids(scan("https://paypal.com.evil.net")))
+    }
+
+    @Test
+    fun homographPunycode() {
+        val r = scan("http://xn--pple-43d.com")
+        assertTrue("typosquat" in ids(r))
+        assertTrue("punycode" in ids(r))
+    }
+
+    @Test
+    fun legitimateDomainsNotFlagged() {
+        for (url in listOf(
+            "https://www.paypal.com", "https://accounts.google.com",
+            "https://login.microsoftonline.com", "https://www.amazon.co.uk", "https://github.com",
+        )) {
+            assertFalse(ids(scan(url)).any { it == "typosquat" || it == "brand_impersonation" }, url)
+        }
+    }
+
+    @Test
+    fun unrelatedWordsNotFlagged() {
+        for (url in listOf("https://pineapple.com", "https://linked.com")) {
+            assertFalse(ids(scan(url)).any { it == "typosquat" || it == "brand_impersonation" }, url)
+        }
+    }
+}
+
+class ScoringTest {
+    @Test
+    fun scoreIsBounded() {
+        val r = scan(
+            "http://secure.login.account.paypa1.com.verify-update-now.xyz/login/password/confirm" +
+                "?url=http://evil.com&" + "a=%41".repeat(10),
+        )
+        assertTrue(r.score in 0..100)
+        assertEquals("High Risk", r.classification)
+    }
+
+    @Test
+    fun cleanUrlIsLowRisk() {
+        val r = scan("https://www.wikipedia.org")
+        assertEquals("Low Risk", r.classification)
+        assertTrue(r.findings.isEmpty())
+    }
+
+    @Test
+    fun classificationBoundaries() {
+        assertEquals("Low Risk", classify(0))
+        assertEquals("Low Risk", classify(29))
+        assertEquals("Suspicious", classify(30))
+        assertEquals("Suspicious", classify(59))
+        assertEquals("High Risk", classify(60))
+        assertEquals("High Risk", classify(100))
+    }
+
+    @Test
+    fun samplePhishingUrlsRankHigh() {
+        for (url in listOf(
+            "http://192.168.10.5/login/verify-account.php",
+            "https://paypa1-secure-login.com/verify/password",
+            "https://secure.login.account.paypal.com.update-info.xyz/confirm",
+        )) {
+            assertEquals("High Risk", scan(url).classification, url)
+        }
+    }
+
+    @Test
+    fun shortenerIsAtLeastSuspicious() {
+        assertEquals("Suspicious", scan("https://bit.ly/abc123").classification)
+    }
+
+    @Test
+    fun findingsSortedByPoints() {
+        val pts = scan("http://192.168.1.1/login").findings.map { it.points }
+        assertEquals(pts.sortedDescending(), pts)
+    }
+
+    @Test
+    fun customConfigChangesWeights() {
+        val custom = UrlAnalyzer(DetectorConfig(weights = mapOf("no_https" to 50)))
+        assertEquals(50, scan("http://example.com", custom).score)
+        assertEquals(15, scan("http://example.com").score) // default analyzer unaffected
+    }
+}
+
+class ReportTest {
+    @Test
+    fun reportHasDisclaimerAndNoSafetyClaim() {
+        val report = scan("https://www.wikipedia.org").toReport()
+        assertTrue("Risk score" in report)
+        assertTrue("does NOT guarantee" in report)
+        assertFalse("completely safe" in report.lowercase())
+    }
+
+    @Test
+    fun reportListsReasons() {
+        assertTrue("IP address" in scan("http://192.168.1.1/login").toReport())
+    }
+}
+
+class ThreatIntelTest {
+    @Test
+    fun noKeyMeansDisabled() {
+        assertEquals("disabled", checkVirusTotal("https://example.com", "").status)
+        val r = UrlAnalyzer().analyze("https://example.com", useThreatIntel = true, apiKey = "")
+        assertEquals("disabled", r.threatIntel.status)
+    }
+
+    @Test
+    fun maliciousVerdictRaisesScore() {
+        val http = FakeHttp(HttpReply(200, vtBody(5, 0, 60, 20)))
+        val r = UrlAnalyzer().analyze("https://example.com", apiKey = "fake", http = http)
+        assertEquals("ok", r.threatIntel.status)
+        assertTrue("ti_malicious" in ids(r))
+        assertEquals("High Risk", r.classification)
+    }
+
+    @Test
+    fun cleanVerdictAddsNothing() {
+        val http = FakeHttp(HttpReply(200, vtBody(0, 0, 70, 10)))
+        val r = UrlAnalyzer().analyze("https://example.com", apiKey = "fake", http = http)
+        assertEquals("Low Risk", r.classification)
+        assertEquals(70, r.threatIntel.harmless)
+    }
+
+    @Test
+    fun httpErrorsAreHandled() {
+        assertEquals("not_found", checkVirusTotal("https://example.com", "k", http = FakeHttp(HttpReply(404, ""))).status)
+        val bad = checkVirusTotal("https://example.com", "k", http = FakeHttp(HttpReply(401, "")))
+        assertEquals("error", bad.status)
+        assertTrue("invalid API key" in bad.message)
+        val limited = checkVirusTotal("https://example.com", "k", http = FakeHttp(HttpReply(429, "")))
+        assertTrue("rate limit" in limited.message)
+    }
+
+    @Test
+    fun networkFailureDoesNotBreakScan() {
+        val r = UrlAnalyzer().analyze(
+            "http://192.168.1.1/login", apiKey = "fake", http = FakeHttp(error = IOException("offline")),
+        )
+        assertEquals("error", r.threatIntel.status)
+        assertTrue(r.score > 0) // offline heuristics still work
+    }
+
+    @Test
+    fun garbageResponseIsHandled() {
+        val ti = checkVirusTotal("https://example.com", "k", http = FakeHttp(HttpReply(200, "not json")))
+        assertEquals("error", ti.status)
+        assertNotNull(ti.message)
+    }
+}
