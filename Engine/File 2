@@ -1,0 +1,58 @@
+package com.fraudx.app.websiteprotection.engine
+
+import com.fraudx.app.websiteprotection.models.*
+
+object SecurityScoreEngine {
+
+    private val penalties = mapOf(
+        ThreatSeverity.CRITICAL to 35,
+        ThreatSeverity.HIGH to 25,
+        ThreatSeverity.MEDIUM to 12,
+        ThreatSeverity.LOW to 5,
+        ThreatSeverity.INFORMATIONAL to 0
+    )
+
+    fun calculate(input: WebsiteThreatInput): Int? {
+
+        if (input.scanStatus == ScanStatus.FAILED) {
+            return null
+        }
+
+        if (input.evidence.any {
+                it.confidence !in 0f..1f
+            }) {
+            return null
+        }
+
+        val evidence = input.evidence
+            .distinctBy { it.evidenceId }
+
+        if (input.scanStatus == ScanStatus.PARTIAL) {
+            return null
+        }
+
+        var penalty = 0
+
+        for (item in evidence) {
+            penalty += penalties[item.severity] ?: 0
+        }
+
+        return (100 - penalty.coerceAtMost(100))
+            .coerceIn(0, 100)
+    }
+
+    fun classify(score: Int?): RiskLevel {
+
+        if (score == null) {
+            return RiskLevel.UNKNOWN
+        }
+
+        return when (score) {
+            in 90..100 -> RiskLevel.LOW
+            in 70..89 -> RiskLevel.MODERATE
+            in 40..69 -> RiskLevel.HIGH
+            in 0..39 -> RiskLevel.CRITICAL
+            else -> RiskLevel.UNKNOWN
+        }
+    }
+}

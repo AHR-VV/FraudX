@@ -1,0 +1,144 @@
+package com.fraudx.app.websiteprotection.knowledge
+
+import com.fraudx.app.websiteprotection.models.*
+
+data class ThreatKnowledge(
+    val category: ThreatCategory,
+    val technicalReason: String,
+    val simpleReason: String,
+    val consequence: String,
+    val precautions: List<String>
+)
+
+object ThreatKnowledgeBase {
+
+    private val knowledge = mapOf(
+
+        ThreatCategory.PHISHING to ThreatKnowledge(
+            ThreatCategory.PHISHING,
+            "Indicators suggest a website may attempt to collect sensitive information through deceptive content.",
+            "This website may be trying to trick you.",
+            "Your passwords or personal information could be stolen.",
+            listOf(
+                "Do not enter passwords.",
+                "Check the website address carefully.",
+                "Open the official website directly."
+            )
+        ),
+
+        ThreatCategory.BRAND_IMPERSONATION to ThreatKnowledge(
+            ThreatCategory.BRAND_IMPERSONATION,
+            "The website contains indicators associated with brand impersonation.",
+            "Someone may be pretending to be a trusted company.",
+            "You could provide information to a fake company.",
+            listOf(
+                "Verify the official website.",
+                "Do not trust logos alone.",
+                "Contact the company through official channels."
+            )
+        ),
+
+        ThreatCategory.CREDENTIAL_THEFT to ThreatKnowledge(
+            ThreatCategory.CREDENTIAL_THEFT,
+            "Evidence indicates possible credential collection.",
+            "This website may steal your login details.",
+            "Someone could access your accounts.",
+            listOf(
+                "Do not enter your password.",
+                "Use a unique password.",
+                "Change exposed passwords immediately."
+            )
+        ),
+
+        ThreatCategory.MALWARE to ThreatKnowledge(
+            ThreatCategory.MALWARE,
+            "Indicators suggest possible malicious file distribution.",
+            "This website may offer dangerous downloads.",
+            "Your device or files could be harmed.",
+            listOf(
+                "Do not download suspicious files.",
+                "Do not install unknown applications.",
+                "Run a trusted security scan if a file was opened."
+            )
+        ),
+
+        ThreatCategory.SUSPICIOUS_REDIRECT to ThreatKnowledge(
+            ThreatCategory.SUSPICIOUS_REDIRECT,
+            "The scanner reported suspicious redirection behaviour.",
+            "This website may send you somewhere unexpected.",
+            "You could land on a fraudulent website.",
+            listOf(
+                "Do not follow unexpected redirects.",
+                "Close suspicious pages.",
+                "Open the intended website directly."
+            )
+        ),
+
+        ThreatCategory.FAKE_PAYMENT to ThreatKnowledge(
+            ThreatCategory.FAKE_PAYMENT,
+            "Indicators suggest possible fraudulent payment activity.",
+            "This payment page may be fake.",
+            "You could lose money or payment information.",
+            listOf(
+                "Do not make the payment.",
+                "Verify the merchant independently.",
+                "Contact your bank if money was sent."
+            )
+        ),
+
+        ThreatCategory.OTP_HARVESTING to ThreatKnowledge(
+            ThreatCategory.OTP_HARVESTING,
+            "Indicators suggest possible one-time-password collection.",
+            "Someone may be trying to obtain your OTP.",
+            "Your account or transaction could be compromised.",
+            listOf(
+                "Never share an OTP.",
+                "Do not enter OTPs on suspicious pages.",
+                "Contact your bank if an OTP was exposed."
+            )
+        ),
+
+        ThreatCategory.FAKE_GOVERNMENT_PORTAL to ThreatKnowledge(
+            ThreatCategory.FAKE_GOVERNMENT_PORTAL,
+            "Indicators suggest possible government-service impersonation.",
+            "This website may pretend to be an official government service.",
+            "Your identity or personal information could be misused.",
+            listOf(
+                "Verify the official government domain.",
+                "Do not upload identity documents.",
+                "Use official government websites."
+            )
+        ),
+
+        ThreatCategory.INSECURE_CONNECTION to ThreatKnowledge(
+            ThreatCategory.INSECURE_CONNECTION,
+            "The scanner reported a connection-security concern.",
+            "Your connection may not be properly protected.",
+            "Information could be exposed during transmission.",
+            listOf(
+                "Avoid entering sensitive information.",
+                "Verify the connection.",
+                "Use the official secure website."
+            )
+        )
+    )
+
+    fun get(category: ThreatCategory): ThreatKnowledge {
+        return knowledge[category] ?: ThreatKnowledge(
+            ThreatCategory.UNKNOWN,
+            "The scanner supplied an unclassified threat indicator.",
+            "We found something we cannot explain yet.",
+            "The website could not be fully assessed.",
+            listOf(
+                "Avoid entering sensitive information.",
+                "Use the official website.",
+                "Try again after a complete scan."
+            )
+        )
+    }
+
+    fun all(): List<ThreatKnowledge> {
+        return knowledge.values.toList()
+    }
+}
+

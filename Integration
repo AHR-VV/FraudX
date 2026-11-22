@@ -1,0 +1,68 @@
+package com.fraudx.app.websiteprotection.integration
+
+import com.fraudx.app.websiteprotection.engine.*
+import com.fraudx.app.websiteprotection.models.*
+import com.fraudx.app.websiteprotection.presentation.*
+
+object WebsiteProtectionManager {
+
+    fun analyze(
+        input: WebsiteThreatInput
+    ): WebsiteProtectionResult {
+
+        val explanations =
+            ThreatExplanationEngine.explain(input.evidence)
+
+        val score =
+            SecurityScoreEngine.calculate(input)
+
+        val risk =
+            SecurityScoreEngine.classify(score)
+
+        val precautions =
+            PrecautionEngine.generate(input)
+
+        val summary = when {
+            input.scanStatus == ScanStatus.FAILED ->
+                "Website scan failed. Safety could not be determined."
+
+            input.scanStatus == ScanStatus.PARTIAL ->
+                "Website scan incomplete. Results are limited."
+
+            explanations.isEmpty() ->
+                "No threats identified in the supplied scan evidence."
+
+            else ->
+                "${explanations.size} threat indicators were reported."
+        }
+
+        return WebsiteProtectionResult(
+            websiteUrl = input.websiteUrl,
+            securityScore = score,
+            riskLevel = risk,
+            explanations = explanations,
+            precautions = precautions,
+            scanStatus = input.scanStatus,
+            summary = summary
+        )
+    }
+
+    fun simpleMode(
+        input: WebsiteThreatInput
+    ): String {
+
+        val result = analyze(input)
+
+        return SimpleProtectionFormatter.format(result)
+    }
+
+    fun advancedMode(
+        input: WebsiteThreatInput
+    ): String {
+
+        val result = analyze(input)
+
+        return AdvancedProtectionFormatter.format(result)
+    }
+}
+

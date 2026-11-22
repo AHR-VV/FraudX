@@ -1,0 +1,74 @@
+package com.fraudx.app.websiteprotection.models
+
+enum class ThreatSeverity {
+    CRITICAL, HIGH, MEDIUM, LOW, INFORMATIONAL
+}
+
+enum class ThreatCategory {
+    PHISHING,
+    BRAND_IMPERSONATION,
+    CREDENTIAL_THEFT,
+    MALWARE,
+    SUSPICIOUS_REDIRECT,
+    FAKE_PAYMENT,
+    OTP_HARVESTING,
+    FAKE_GOVERNMENT_PORTAL,
+    INSECURE_CONNECTION,
+    UNKNOWN
+}
+
+enum class ScanStatus {
+    COMPLETE, PARTIAL, FAILED
+}
+
+enum class RiskLevel {
+    SAFE, LOW, MODERATE, HIGH, CRITICAL, UNKNOWN
+}
+
+enum class ProtectionMode {
+    SIMPLE, ADVANCED
+}
+
+data class ThreatEvidence(
+    val evidenceId: String,
+    val category: ThreatCategory,
+    val severity: ThreatSeverity,
+    val description: String,
+    val confidence: Float,
+    val source: String
+)
+
+data class WebsiteThreatInput(
+    val websiteUrl: String,
+    val scanStatus: ScanStatus,
+    val evidence: List<ThreatEvidence> = emptyList(),
+    val userAlreadyInteracted: Boolean = false,
+    val passwordSubmitted: Boolean = false,
+    val otpSubmitted: Boolean = false,
+    val paymentSubmitted: Boolean = false
+)
+
+data class ThreatExplanation(
+    val category: ThreatCategory,
+    val severity: ThreatSeverity,
+    val technicalReason: String,
+    val simpleReason: String,
+    val possibleConsequence: String
+)
+
+data class SafetyPrecaution(
+    val title: String,
+    val description: String,
+    val priority: ThreatSeverity,
+    val actionType: String
+)
+
+data class WebsiteProtectionResult(
+    val websiteUrl: String,
+    val securityScore: Int?,
+    val riskLevel: RiskLevel,
+    val explanations: List<ThreatExplanation>,
+    val precautions: List<SafetyPrecaution>,
+    val scanStatus: ScanStatus,
+    val summary: String
+)

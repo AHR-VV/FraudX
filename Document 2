@@ -1,0 +1,68 @@
+# FRAUDX - Website Protection Module
+
+## 1. Module Overview
+
+The Website Protection Module is responsible for explaining website security risks using evidence received from the URL scanning module.
+
+It does not independently scan URLs. It processes the scanner's output and converts the detected indicators into understandable security information.
+
+## 2. Main Responsibilities
+
+- Interpret threat indicators received from the scanner.
+- Explain why a website may be dangerous.
+- Calculate a security score.
+- Assign a risk level.
+- Generate precautions and recommended actions.
+- Present results in Simple Mode and Advanced Mode.
+
+## 3. Module Structure
+
+- models: Data structures used throughout the module.
+- knowledge: Threat explanations and precaution information.
+- engine: Threat explanation, scoring and precaution logic.
+- presentation: Text formatting for both user modes.
+- ui: Screen data and mode selection logic.
+- integration: Main manager that connects the module components.
+- tests: Test scenarios and validation cases.
+- docs: Technical documentation.
+
+## 4. User Modes
+
+### Simple Mode
+Designed for senior citizens and non-technical users.
+
+Displays:
+- Simple safety status.
+- Easy-to-understand explanation.
+- Clear precautions.
+- Actions to take if information was submitted.
+
+### Advanced Mode
+Designed for students, teachers and technical users.
+
+Displays:
+- Security score.
+- Risk classification.
+- Threat categories.
+- Technical explanations.
+- Detailed precautions.
+
+## 5. Processing Flow
+
+1. Receive scan information from the URL scanning module.
+2. Validate the scan status and evidence.
+3. Explain the detected indicators.
+4. Calculate the security score when the scan result permits it.
+5. Determine the risk level.
+6. Generate precautions.
+7. Format the result for the selected user mode.
+
+## 6. Important Limitation
+
+The accuracy of the protection result depends on the quality of the evidence received from the scanning module.
+
+A website must not be declared completely safe merely because no threat was detected.
+
+## 7. Project Status
+
+This module is under development. Integration, automated testing, scoring validation and UI implementation must be completed before release.

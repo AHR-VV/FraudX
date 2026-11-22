@@ -1,0 +1,60 @@
+package com.fraudx.app.websiteprotection.presentation
+
+import com.fraudx.app.websiteprotection.models.*
+
+object AdvancedProtectionFormatter {
+
+    fun format(
+        result: WebsiteProtectionResult
+    ): String {
+
+        return buildString {
+
+            appendLine("FRAUDX WEBSITE PROTECTION")
+            appendLine("========================")
+            appendLine()
+
+            appendLine("Website: ${result.websiteUrl}")
+            appendLine("Scan status: ${result.scanStatus}")
+            appendLine("Security score: ${result.securityScore ?: "Unavailable"}/100")
+            appendLine("Risk: ${result.riskLevel}")
+            appendLine()
+
+            appendLine("THREAT ANALYSIS")
+            appendLine("---------------")
+
+            if (result.explanations.isEmpty()) {
+                appendLine("No threat explanations available.")
+            }
+
+            result.explanations.forEachIndexed { index, threat ->
+
+                appendLine()
+                appendLine("Threat ${index + 1}")
+                appendLine("Category: ${threat.category}")
+                appendLine("Severity: ${threat.severity}")
+                appendLine("Technical reason: ${threat.technicalReason}")
+                appendLine("Simple reason: ${threat.simpleReason}")
+                appendLine("Consequence: ${threat.possibleConsequence}")
+            }
+
+            appendLine()
+            appendLine("RECOMMENDED PRECAUTIONS")
+            appendLine("----------------------")
+
+            result.precautions.forEachIndexed { index, item ->
+
+                appendLine()
+                appendLine("${index + 1}. ${item.title}")
+                appendLine("Priority: ${item.priority}")
+                appendLine("Details: ${item.description}")
+                appendLine("Action: ${item.actionType}")
+            }
+
+            appendLine()
+            appendLine("SUMMARY")
+            appendLine("-------")
+            appendLine(result.summary)
+        }
+    }
+}
