@@ -1,0 +1,32 @@
+package com.fraudx.app.websiteprotection.engine
+
+import com.fraudx.app.websiteprotection.knowledge.ThreatKnowledgeBase
+import com.fraudx.app.websiteprotection.models.*
+
+object ThreatExplanationEngine {
+
+    fun explain(
+        evidence: List<ThreatEvidence>
+    ): List<ThreatExplanation> {
+
+        return evidence
+            .filter { it.confidence in 0f..1f }
+            .distinctBy { it.evidenceId }
+            .map { item ->
+
+                val knowledge =
+                    ThreatKnowledgeBase.get(item.category)
+
+                ThreatExplanation(
+                    category = item.category,
+                    severity = item.severity,
+                    technicalReason =
+                        item.description.ifBlank {
+                            knowledge.technicalReason
+                        },
+                    simpleReason = knowledge.simpleReason,
+                    possibleConsequence = knowledge.consequence
+                )
+            }
+    }
+}
