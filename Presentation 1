@@ -1,0 +1,60 @@
+package com.fraudx.app.websiteprotection.presentation
+
+import com.fraudx.app.websiteprotection.models.*
+
+object SimpleProtectionFormatter {
+
+    fun format(
+        result: WebsiteProtectionResult
+    ): String {
+
+        if (result.scanStatus == ScanStatus.FAILED) {
+            return """
+                Website could not be checked.
+                Please do not enter personal information.
+                Try again later.
+            """.trimIndent()
+        }
+
+        val status = when (result.riskLevel) {
+            RiskLevel.SAFE -> "No threats identified"
+            RiskLevel.LOW -> "Looks relatively safe"
+            RiskLevel.MODERATE -> "Be careful"
+            RiskLevel.HIGH -> "Dangerous website"
+            RiskLevel.CRITICAL -> "Very dangerous website"
+            RiskLevel.UNKNOWN -> "Website not fully checked"
+        }
+
+        val reasons = result.explanations
+            .map { it.simpleReason }
+            .distinct()
+
+        val precautions = result.precautions
+            .map { it.title }
+            .distinct()
+
+        return buildString {
+
+            appendLine(status)
+            appendLine()
+
+            appendLine(result.summary)
+            appendLine()
+
+            if (reasons.isNotEmpty()) {
+                appendLine("Why?")
+                reasons.forEach {
+                    appendLine("- $it")
+                }
+                appendLine()
+            }
+
+            if (precautions.isNotEmpty()) {
+                appendLine("What should you do?")
+                precautions.forEach {
+                    appendLine("- $it")
+                }
+            }
+        }.trim()
+    }
+}
