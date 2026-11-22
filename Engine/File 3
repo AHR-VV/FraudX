@@ -1,0 +1,82 @@
+package com.fraudx.app.websiteprotection.engine
+
+import com.fraudx.app.websiteprotection.knowledge.ThreatKnowledgeBase
+import com.fraudx.app.websiteprotection.models.*
+
+object PrecautionEngine {
+
+    fun generate(
+        input: WebsiteThreatInput
+    ): List<SafetyPrecaution> {
+
+        val precautions = mutableListOf<SafetyPrecaution>()
+
+        if (input.scanStatus != ScanStatus.COMPLETE) {
+            precautions.add(
+                SafetyPrecaution(
+                    "Verify the website",
+                    "The scan is incomplete. Avoid sensitive actions until verification.",
+                    ThreatSeverity.HIGH,
+                    "VERIFY"
+                )
+            )
+        }
+
+        input.evidence
+            .distinctBy { it.evidenceId }
+            .forEach { evidence ->
+
+                val knowledge =
+                    ThreatKnowledgeBase.get(evidence.category)
+
+                knowledge.precautions.forEach { message ->
+
+                    precautions.add(
+                        SafetyPrecaution(
+                            title = message,
+                            description = knowledge.simpleReason,
+                            priority = evidence.severity,
+                            actionType = evidence.category.name
+                        )
+                    )
+                }
+            }
+
+        if (input.passwordSubmitted) {
+            precautions.add(
+                SafetyPrecaution(
+                    "Change your password",
+                    "You reported entering a password. Change it using the official website.",
+                    ThreatSeverity.CRITICAL,
+                    "PASSWORD_EXPOSED"
+                )
+            )
+        }
+
+        if (input.otpSubmitted) {
+            precautions.add(
+                SafetyPrecaution(
+                    "Contact your bank or account provider",
+                    "You reported sharing an OTP. Contact the official provider immediately.",
+                    ThreatSeverity.CRITICAL,
+                    "OTP_EXPOSED"
+                )
+            )
+        }
+
+        if (input.paymentSubmitted) {
+            precautions.add(
+                SafetyPrecaution(
+                    "Contact your bank",
+                    "You reported making a payment. Contact your bank through its official channel.",
+                    ThreatSeverity.CRITICAL,
+                    "PAYMENT_SUBMITTED"
+                )
+            )
+        }
+
+        return precautions.distinctBy {
+            it.title + it.actionType
+        }
+    }
+}
