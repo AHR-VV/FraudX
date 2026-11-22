@@ -1,0 +1,60 @@
+
+FRAUDX - WEBSITE PROTECTION
+THREAT RESEARCH NOTES
+
+PURPOSE
+
+This document describes the threat categories that the Website
+Protection Module is designed to explain when the scanner reports
+relevant evidence.
+
+1. PHISHING
+A website may imitate a legitimate service to trick visitors into
+revealing personal or login information.
+
+2. BRAND IMPERSONATION
+A website may copy the name, logo or appearance of a trusted brand
+to appear genuine.
+
+3. CREDENTIAL THEFT
+A suspicious website may attempt to collect usernames, passwords
+or other account login details.
+
+4. MALWARE
+A website may distribute harmful files or attempt to make visitors
+download malicious software.
+
+5. SUSPICIOUS REDIRECT
+A website may redirect visitors to unexpected or potentially
+dangerous destinations.
+
+6. FAKE PAYMENT PAGE
+A fraudulent payment page may attempt to collect card or banking
+information.
+
+7. OTP HARVESTING
+A fraudulent page may ask visitors to enter one-time passwords
+that could be used to authorize transactions or access accounts.
+
+8. FAKE GOVERNMENT PORTAL
+A fraudulent website may imitate a government website to collect
+personal information or payments.
+
+9. INSECURE CONNECTION
+An insecure connection can expose information to interception.
+HTTPS alone does not prove that a website is trustworthy.
+
+10. UNKNOWN THREAT
+Used when the scanner reports an indicator that does not match
+a supported threat category.
+
+RESEARCH AND IMPLEMENTATION RULE
+
+The module must explain only the evidence actually supplied by the
+scanner. It must not invent threat detections or claim that a
+website is malicious without supporting evidence.
+
+PRECAUTION PRINCIPLE
+
+Advice should be appropriate to the detected threat and to the
+actions already taken by the user.
