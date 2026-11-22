@@ -1,0 +1,462 @@
+package linkshield
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Checkbox
+import androidx.compose.material.CheckboxDefaults
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedButton
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.darkColors
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+/* Main.kt - Compose Multiplatform desktop GUI for Link Shield.
+ * The app never opens or executes the links you scan. */
+
+// --------------------------------------------------------------------------- //
+// Cybersecurity theme
+// --------------------------------------------------------------------------- //
+object Palette {
+    val Bg = Color(0xFF0A0F1A)
+    val Panel = Color(0xFF111A2B)
+    val PanelAlt = Color(0xFF172640)
+    val Border = Color(0xFF1F3355)
+    val Accent = Color(0xFF00E5FF)
+    val Text = Color(0xFFE6EDF7)
+    val Muted = Color(0xFF8A9BB8)
+    val Low = Color(0xFF2ECC71)
+    val Suspicious = Color(0xFFF5A623)
+    val High = Color(0xFFFF4D5E)
+}
+
+fun riskColor(classification: String): Color = when (classification) {
+    "High Risk" -> Palette.High
+    "Suspicious" -> Palette.Suspicious
+    else -> Palette.Low
+}
+
+val SAMPLE_URLS = listOf(
+    "https://www.wikipedia.org",
+    "https://bit.ly/3xYzAbc",
+    "http://192.168.10.5/login/verify-account.php",
+    "https://paypa1-secure-login.com/verify/password",
+    "https://secure.login.account.paypal.com.update-info.xyz/confirm",
+    "http://xn--pple-43d.com",
+    "http://3232235777/",
+    "https://www.google.com@evil-site.top/signin",
+)
+
+fun main() = application {
+    Window(
+        onCloseRequest = ::exitApplication,
+        title = "Link Shield - AI-Based Suspicious Link Detection System",
+        state = rememberWindowState(width = 1200.dp, height = 800.dp),
+    ) {
+        LaunchedEffect(Unit) { window.minimumSize = java.awt.Dimension(1000, 680) }
+        MaterialTheme(
+            colors = darkColors(
+                primary = Palette.Accent,
+                background = Palette.Bg,
+                surface = Palette.Panel,
+                onSurface = Palette.Text,
+                onBackground = Palette.Text,
+            ),
+        ) {
+            Surface(modifier = Modifier.fillMaxSize(), color = Palette.Bg) { LinkShieldApp() }
+        }
+    }
+}
+
+// --------------------------------------------------------------------------- //
+// Screen
+// --------------------------------------------------------------------------- //
+@Composable
+fun LinkShieldApp() {
+    val analyzer = remember { UrlAnalyzer() }
+    val store = remember { HistoryStore() }
+    val hasKey = remember { Env.apiKey().isNotEmpty() }
+    val scope = rememberCoroutineScope()
+    val clipboard = LocalClipboardManager.current
+
+    var input by remember { mutableStateOf("") }
+    var result by remember { mutableStateOf<ScanResult?>(null) }
+    var status by remember { mutableStateOf("") }
+    var statusIsError by remember { mutableStateOf(false) }
+    var scanning by remember { mutableStateOf(false) }
+    var useVirusTotal by remember { mutableStateOf(hasKey) }
+    var sampleMenuOpen by remember { mutableStateOf(false) }
+    val history = remember { mutableStateListOf<HistoryEntry>().also { it.addAll(store.load()) } }
+
+    fun refreshHistory() {
+        history.clear()
+        history.addAll(store.load())
+    }
+
+    fun scan(url: String) {
+        if (scanning) return
+        if (url.isBlank()) {
+            status = "Please paste a URL first."
+            statusIsError = true
+            return
+        }
+        scanning = true
+        statusIsError = false
+        status = "Analysing link (it is NOT being opened)..."
+        val vt = useVirusTotal
+        // Runs on a background thread so the window never freezes during network lookups
+        scope.launch {
+            val outcome = withContext(Dispatchers.IO) { runCatching { analyzer.analyze(url, vt) } }
+            val scanResult = outcome.getOrNull()
+            if (scanResult != null) {
+                result = scanResult
+                val saved = withContext(Dispatchers.IO) {
+                    store.add(
+                        HistoryEntry(
+                            scanResult.scannedAt, scanResult.score,
+                            scanResult.classification, scanResult.normalizedUrl,
+                        ),
+                    )
+                }
+                refreshHistory()
+                status = if (saved) "Scan complete." else "Scan finished, but history could not be saved."
+                statusIsError = !saved
+            } else {
+                val error = outcome.exceptionOrNull()
+                status = if (error is InvalidUrlException) {
+                    error.message ?: "Invalid URL."
+                } else {
+                    "Unexpected error: ${error?.message}"
+                }
+                statusIsError = true
+            }
+            scanning = false
+        }
+    }
+
+    Column(Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 18.dp)) {
+        Header(hasKey)
+        Spacer(Modifier.height(14.dp))
+
+        Row(Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            // ------------------------- left: input + results ------------------------- //
+            Column(Modifier.weight(3f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Panel {
+                    SectionLabel("PASTE A LINK TO ANALYSE")
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = input,
+                        onValueChange = { input = it },
+                        singleLine = true,
+                        placeholder = { Text("https://example.com/login", color = Palette.Muted) },
+                        textStyle = androidx.compose.ui.text.TextStyle(
+                            fontFamily = FontFamily.Monospace, fontSize = 15.sp, color = Palette.Text,
+                        ),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            textColor = Palette.Text,
+                            cursorColor = Palette.Accent,
+                            focusedBorderColor = Palette.Accent,
+                            unfocusedBorderColor = Palette.Border,
+                            backgroundColor = Palette.Bg,
+                        ),
+                        modifier = Modifier.fillMaxWidth().onPreviewKeyEvent { event ->
+                            if (event.key == Key.Enter && event.type == KeyEventType.KeyDown) {
+                                scan(input)
+                                true
+                            } else {
+                                false
+                            }
+                        },
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Button(
+                            onClick = { scan(input) },
+                            enabled = !scanning,
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = Palette.Accent, contentColor = Color(0xFF001018),
+                            ),
+                        ) { Text(if (scanning) "Scanning..." else "Scan Link", fontWeight = FontWeight.Bold) }
+                        Spacer(Modifier.width(8.dp))
+                        OutlinedButton(
+                            enabled = result != null,
+                            onClick = {
+                                result?.let {
+                                    clipboard.setText(AnnotatedString(it.toReport()))
+                                    status = "Report copied to clipboard."
+                                    statusIsError = false
+                                }
+                            },
+                        ) { Text("Copy Report") }
+                        Spacer(Modifier.width(8.dp))
+                        OutlinedButton(
+                            onClick = {
+                                input = ""
+                                result = null
+                                status = ""
+                                statusIsError = false
+                            },
+                        ) { Text("Clear") }
+
+                        Spacer(Modifier.weight(1f))
+
+                        Box {
+                            OutlinedButton(onClick = { sampleMenuOpen = true }) { Text("Load sample URL  ▾") }
+                            DropdownMenu(expanded = sampleMenuOpen, onDismissRequest = { sampleMenuOpen = false }) {
+                                SAMPLE_URLS.forEach { sample ->
+                                    DropdownMenuItem(onClick = {
+                                        sampleMenuOpen = false
+                                        input = sample
+                                        scan(sample)
+                                    }) { Text(sample, fontSize = 12.sp) }
+                                }
+                            }
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        Checkbox(
+                            checked = useVirusTotal,
+                            onCheckedChange = { useVirusTotal = it },
+                            enabled = hasKey,
+                            colors = CheckboxDefaults.colors(checkedColor = Palette.Accent),
+                        )
+                        Text("Use VirusTotal", color = if (hasKey) Palette.Text else Palette.Muted, fontSize = 13.sp)
+                    }
+                    if (status.isNotEmpty()) {
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            status, fontSize = 12.sp,
+                            color = if (statusIsError) Palette.High else Palette.Muted,
+                        )
+                    }
+                }
+
+                ScorePanel(result)
+
+                Panel(Modifier.weight(1f)) {
+                    SectionLabel("WHY THIS RESULT?")
+                    Spacer(Modifier.height(8.dp))
+                    val current = result
+                    when {
+                        current == null -> Text(
+                            "Paste a URL above and press Scan Link. The explanation for every " +
+                                "point of risk will appear here.",
+                            color = Palette.Muted, fontSize = 13.sp,
+                        )
+                        current.findings.isEmpty() -> Text(
+                            "No warning signs were found by the rules. This does NOT guarantee " +
+                                "the link is safe - stay cautious.",
+                            color = Palette.Low, fontSize = 13.sp,
+                        )
+                        else -> LazyColumn(
+                            Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) { items(current.findings) { FindingCard(it) } }
+                    }
+                }
+            }
+
+            // ----------------------------- right: history ----------------------------- //
+            Panel(Modifier.width(300.dp).fillMaxHeight()) {
+                SectionLabel("SCAN HISTORY")
+                Spacer(Modifier.height(8.dp))
+                if (history.isEmpty()) {
+                    Text("No scans yet.", color = Palette.Muted, fontSize = 13.sp, modifier = Modifier.weight(1f))
+                } else {
+                    LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        items(history) { entry ->
+                            HistoryRow(entry) {
+                                input = entry.url
+                                scan(entry.url)
+                            }
+                        }
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+                OutlinedButton(
+                    onClick = {
+                        store.clear()
+                        refreshHistory()
+                        status = "History cleared."
+                        statusIsError = false
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text("Clear History") }
+            }
+        }
+
+        Spacer(Modifier.height(10.dp))
+        Text(
+            "Links are never opened or executed by this tool.  $DISCLAIMER",
+            color = Palette.Muted, fontSize = 11.sp, textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+// --------------------------------------------------------------------------- //
+// Reusable pieces
+// --------------------------------------------------------------------------- //
+@Composable
+fun Header(hasKey: Boolean) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.weight(1f)) {
+            Text("◈  LINK SHIELD", color = Palette.Accent, fontSize = 26.sp, fontWeight = FontWeight.Bold)
+            Text("AI-Based Suspicious Link Detection System", color = Palette.Muted, fontSize = 13.sp)
+        }
+        Text(
+            if (hasKey) "● VirusTotal: connected" else "● VirusTotal: not configured (offline rules only)",
+            color = if (hasKey) Palette.Low else Palette.Muted, fontSize = 12.sp,
+        )
+    }
+}
+
+@Composable
+fun Panel(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+    val shape = RoundedCornerShape(14.dp)
+    Column(
+        modifier = modifier.fillMaxWidth().clip(shape).background(Palette.Panel)
+            .border(1.dp, Palette.Border, shape).padding(16.dp),
+        content = content,
+    )
+}
+
+@Composable
+fun SectionLabel(text: String) {
+    Text(text, color = Palette.Muted, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+}
+
+@Composable
+fun ScorePanel(result: ScanResult?) {
+    val color = result?.let { riskColor(it.classification) } ?: Palette.Muted
+    Panel {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                result?.score?.toString() ?: "--", color = color, fontSize = 46.sp,
+                fontWeight = FontWeight.Bold, modifier = Modifier.width(110.dp),
+            )
+            Column(Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    SectionLabel("RISK SCORE (0-100)")
+                    Spacer(Modifier.weight(1f))
+                    Box(
+                        Modifier.clip(RoundedCornerShape(8.dp))
+                            .background(if (result == null) Palette.PanelAlt else color)
+                            .padding(horizontal = 12.dp, vertical = 4.dp),
+                    ) {
+                        Text(
+                            result?.classification?.uppercase() ?: "NO SCAN YET",
+                            color = if (result == null) Palette.Muted else Color(0xFF06101A),
+                            fontWeight = FontWeight.Bold, fontSize = 13.sp,
+                        )
+                    }
+                }
+                Spacer(Modifier.height(10.dp))
+                LinearProgressIndicator(
+                    progress = (result?.score ?: 0) / 100f,
+                    color = color,
+                    backgroundColor = Palette.Bg,
+                    modifier = Modifier.fillMaxWidth().height(12.dp).clip(RoundedCornerShape(6.dp)),
+                )
+            }
+        }
+        if (result != null) {
+            Spacer(Modifier.height(10.dp))
+            Text(
+                result.normalizedUrl, color = Palette.Text, fontSize = 12.sp,
+                fontFamily = FontFamily.Monospace, maxLines = 2, overflow = TextOverflow.Ellipsis,
+            )
+            Text(result.threatIntel.summary(), color = Palette.Muted, fontSize = 12.sp)
+        }
+    }
+}
+
+@Composable
+fun FindingCard(finding: Finding) {
+    val tone = when {
+        finding.points >= 30 -> Palette.High
+        finding.points >= 12 -> Palette.Suspicious
+        else -> Palette.Accent
+    }
+    Row(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(Palette.PanelAlt).padding(12.dp),
+        verticalAlignment = Alignment.Top,
+    ) {
+        Text(
+            "+${finding.points}", color = tone, fontSize = 20.sp,
+            fontWeight = FontWeight.Bold, modifier = Modifier.width(58.dp),
+        )
+        Column(Modifier.weight(1f)) {
+            Text(finding.title, color = Palette.Text, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(3.dp))
+            Text(finding.description, color = Palette.Muted, fontSize = 12.sp)
+        }
+    }
+}
+
+@Composable
+fun HistoryRow(entry: HistoryEntry, onClick: () -> Unit) {
+    Column(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).clickable(onClick = onClick).padding(8.dp),
+    ) {
+        Text(
+            "${entry.score}  ${entry.classification}", color = riskColor(entry.classification),
+            fontSize = 12.sp, fontWeight = FontWeight.Bold,
+        )
+        Text(
+            entry.url, color = Palette.Muted, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
