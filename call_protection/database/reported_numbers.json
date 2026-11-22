@@ -1,0 +1,37 @@
+[
+    {
+        "phone": "9000000001",
+        "category": "Fake Lottery",
+        "reports": 5,
+        "status": "Under Review"
+    },
+    {
+        "phone": "9000000002",
+        "category": "impersonation",
+        "reports": 3,
+        "status": "Under Review"
+    },
+    {
+        "phone": "9000000001",
+        "category": "Other",
+        "reports": 1,
+        "status": "Unverified - Under Review",
+        "description": "bank fraud"
+    },
+    {
+        "phone": "9000000001",
+        "category": "Fake Lottery",
+        "reports": 1,
+        "status": "Unverified - Under Review",
+        "description": "fake lottery",
+        "submitted_at": "2026-11-21T12:16:59+00:00"
+    },
+    {
+        "phone": "0000000000",
+        "category": "Other",
+        "reports": 1,
+        "status": "Unverified - Under Review",
+        "description": "temporary local test record only",
+        "submitted_at": "2026-11-21T12:21:09+00:00"
+    }
+]
