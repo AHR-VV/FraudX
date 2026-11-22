@@ -1,0 +1,48 @@
+package linkshield
+
+import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+
+data class HistoryEntry(
+    val time: String,
+    val score: Int,
+    val classification: String,
+    val url: String,
+)
+
+/**
+ * Stores scan history as a tab-separated text file next to the program:
+ * time <TAB> score <TAB> classification <TAB> url
+ * (URLs cannot contain tabs because the detector rejects whitespace.)
+ */
+class HistoryStore(private val path: Path = Paths.get("scan_history.tsv")) {
+
+    fun load(): List<HistoryEntry> = try {
+        Files.readAllLines(path).mapNotNull { line ->
+            val p = line.split("\t")
+            val score = p.getOrNull(1)?.toIntOrNull()
+            if (p.size == 4 && score != null) HistoryEntry(p[0], score, p[2], p[3]) else null
+        }
+    } catch (e: IOException) {
+        emptyList()
+    }
+
+    /** Adds an entry at the top. Returns false if the file could not be written. */
+    fun add(entry: HistoryEntry): Boolean = save((listOf(entry) + load()).take(MAX_ENTRIES))
+
+    fun clear(): Boolean = save(emptyList())
+
+    private fun save(entries: List<HistoryEntry>): Boolean = try {
+        Files.write(path, entries.map { "${it.time}\t${it.score}\t${it.classification}\t${it.url}" })
+        true
+    } catch (e: IOException) {
+        false
+    }
+
+    companion object {
+        const val MAX_ENTRIES = 100
+    }
+}
+
