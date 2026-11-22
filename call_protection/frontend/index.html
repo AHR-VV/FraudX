@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FraudX - Call Protection</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px 15px;
+            background: #101827;
+            color: #FFFFFF;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: auto;
+            padding: 28px;
+            background: #1B2638;
+            border-radius: 14px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #55A5FF;
+        }
+
+        h2 {
+            color: #FFFFFF;
+            margin-top: 30px;
+        }
+
+        p {
+            color: #B8C5D8;
+            line-height: 1.6;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 13px;
+            margin-top: 12px;
+            border: 1px solid #42516A;
+            border-radius: 7px;
+            background: #101827;
+            color: white;
+            font-size: 15px;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #2878E5;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        button:hover {
+            background: #1762C5;
+        }
+
+        #result, #reportResult {
+            margin-top: 22px;
+            padding: 18px;
+            border-radius: 10px;
+            display: none;
+            line-height: 1.8;
+            overflow-wrap: anywhere;
+            white-space: pre-line;
+        }
+
+        .warning {
+            background: #351B24;
+            color: #FF8791;
+            border: 1px solid #B93848;
+        }
+
+        .unknown {
+            background: #292D38;
+            color: #E1E5EF;
+            border: 1px solid #68738A;
+        }
+
+        .success {
+            background: #153426;
+            color: #72E5A0;
+            border: 1px solid #238A56;
+        }
+
+        .error {
+            background: #382C16;
+            color: #FFD27A;
+            border: 1px solid #A87924;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid #42516A;
+            margin: 30px 0;
+        }
+
+        footer {
+            text-align: center;
+            color: #8796AD;
+            margin-top: 30px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>FraudX Call Protection</h1>
+
+    <p>
+        Check whether a phone number has been reported
+        by users for suspicious activity.
+    </p>
+
+    <h2>Check a Phone Number</h2>
+
+    <input
+        type="tel"
+        id="phone"
+        placeholder="Enter 10-digit phone number"
+        maxlength="10"
+        inputmode="numeric"
+    >
+
+    <button onclick="checkNumber()">Check Number</button>
+
+    <div id="result" role="status" aria-live="polite"></div>
+
+    <hr class="divider">
+
+    <h2>Report a Suspicious Number</h2>
+
+    <p>
+        Help the community by submitting a report
+        about a suspicious phone number.
+    </p>
+
+    <input
+        type="tel"
+        id="reportPhone"
+        placeholder="Enter phone number"
+        maxlength="10"
+        inputmode="numeric"
+    >
+
+    <select id="category">
+        <option value="">Select Report Category</option>
+        <option value="Fake Lottery">Fake Lottery</option>
+        <option value="Impersonation">Impersonation</option>
+        <option value="Bank Fraud">Bank Fraud</option>
+        <option value="Suspicious Call">Suspicious Call</option>
+        <option value="Other">Other</option>
+    </select>
+
+    <textarea
+        id="description"
+        placeholder="Describe what happened (10-500 characters)"
+        maxlength="500"
+    ></textarea>
+
+    <button onclick="reportNumber()">Submit Report</button>
+
+    <div id="reportResult" role="status" aria-live="polite"></div>
+
+    <footer>
+        FraudX Call Protection | Community Reporting Prototype
+    </footer>
+
+</div>
+
+<script>
+
+async function checkNumber() {
+
+    const phone = document.getElementById("phone").value.trim();
+    const result = document.getElementById("result");
+
+    result.style.display = "block";
+
+    if (!/^\d{10}$/.test(phone)) {
+        result.className = "error";
+        result.textContent = "Please enter a valid 10-digit number.";
+        return;
+    }
+
+    result.className = "";
+    result.textContent = "Checking number...";
+
+    try {
+
+        const response = await fetch(
+            "/api/check-number?phone=" + encodeURIComponent(phone)
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Unable to check number.");
+        }
+
+        if (data.found) {
+
+            const dates = data.result.dates.map(item => {
+
+                const dateText = item.date
+                    ? new Date(item.date).toLocaleString()
+                    : "Date not available (older record)";
+
+                return "- " + item.category + ": " + dateText;
+
+            }).join("\n");
+
+            result.className = "warning";
+
+            result.textContent =
+                "COMMUNITY REPORTS FOUND\n\n" +
+                "Category: " + data.result.category + "\n" +
+                "Total reports: " + data.result.reports + "\n" +
+                "Status: " + data.result.status + "\n\n" +
+                "REPORT DATES:\n" + dates + "\n\n" +
+                data.message;
+
+        } else {
+
+            result.className = "unknown";
+            result.textContent = data.message;
+
+        }
+
+    } catch (error) {
+
+        result.className = "error";
+        result.textContent = error.message;
+
+    }
+}
+
+
+async function reportNumber() {
+
+    const phone = document.getElementById("reportPhone").value.trim();
+    const category = document.getElementById("category").value;
+    const description = document.getElementById("description").value.trim();
+
+    const reportResult = document.getElementById("reportResult");
+
+    reportResult.style.display = "block";
+
+    if (!/^\d{10}$/.test(phone)) {
+        reportResult.className = "error";
+        reportResult.textContent = "Please enter a valid 10-digit number.";
+        return;
+    }
+
+    if (!category) {
+        reportResult.className = "error";
+        reportResult.textContent = "Please select a report category.";
+        return;
+    }
+
+    if (description.length < 10 || description.length > 500) {
+        reportResult.className = "error";
+        reportResult.textContent =
+            "Description must be between 10 and 500 characters.";
+        return;
+    }
+
+    reportResult.className = "";
+    reportResult.textContent = "Submitting report...";
+
+    try {
+
+        const response = await fetch("/api/report-number", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                phone: phone,
+                category: category,
+                description: description
+            })
+
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Unable to submit report.");
+        }
+
+        reportResult.className = "success";
+
+        reportResult.textContent =
+            data.message +
+            "\nSubmitted at: " +
+            new Date(data.submitted_at).toLocaleString();
+
+        document.getElementById("reportPhone").value = "";
+        document.getElementById("category").value = "";
+        document.getElementById("description").value = "";
+
+    } catch (error) {
+
+        reportResult.className = "error";
+        reportResult.textContent = error.message;
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>
