@@ -24,7 +24,9 @@ import java.util.UUID
  * In-memory mock implementation of [FraudXRepository] seeded with the exact reference screens.
  * Replace with a production Retrofit/Room repository without changing any Compose UI code.
  */
-class MockFraudXRepository : FraudXRepository {
+class MockFraudXRepository(
+    private val storage: LocalFraudStorage? = null
+) : FraudXRepository {
 
     private val protectionFlow = MutableStateFlow(ProtectionState())
 
@@ -82,6 +84,15 @@ class MockFraudXRepository : FraudXRepository {
             )
         )
     )
+
+    // Restore previously saved allow/block rules when local storage is available.
+    init {
+        storage?.let { localStorage ->
+            if (localStorage.hasSavedRules()) {
+                rulesFlow.value = localStorage.loadRules()
+            }
+        }
+    }
 
     private val interceptionsFlow = MutableStateFlow(
         listOf(
@@ -280,10 +291,10 @@ class MockFraudXRepository : FraudXRepository {
 
         val detectedType = when {
             lower.startsWith("http") || lower.contains(".com") || lower.contains(".xyz") ||
-                lower.contains(".top") || lower.contains(".net") || lower.contains(".org") ->
+                    lower.contains(".top") || lower.contains(".net") || lower.contains(".org") ->
                 RuleCategory.WEBSITE
             trimmed.replace(Regex("[\\s()+-]"), "").all { it.isDigit() } &&
-                trimmed.count { it.isDigit() } >= 7 ->
+                    trimmed.count { it.isDigit() } >= 7 ->
                 RuleCategory.PHONE
             else -> RuleCategory.SMS
         }
@@ -414,6 +425,7 @@ class MockFraudXRepository : FraudXRepository {
         rulesFlow.update { current ->
             listOf(rule) + current.filterNot { it.target.equals(cleaned, ignoreCase = true) }
         }
+        storage?.saveRules(rulesFlow.value)
         appendAudit(
             actionLabel = if (action == RuleAction.ALLOWED) "ALLOW ADDED" else "BLOCK ADDED",
             target = cleaned,
@@ -448,6 +460,7 @@ class MockFraudXRepository : FraudXRepository {
             }
         }
         updatedRule?.let {
+            storage?.saveRules(rulesFlow.value)
             appendAudit(
                 actionLabel = "RULE MOVED",
                 target = it.target,
@@ -461,6 +474,7 @@ class MockFraudXRepository : FraudXRepository {
         val removed = rulesFlow.value.firstOrNull { it.id == ruleId }
         rulesFlow.update { list -> list.filterNot { it.id == ruleId } }
         removed?.let {
+            storage?.saveRules(rulesFlow.value)
             appendAudit(
                 actionLabel = "RULE DELETED",
                 target = it.target,
