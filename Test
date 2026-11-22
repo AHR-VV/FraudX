@@ -1,0 +1,87 @@
+package com.fraudx.app.websiteprotection.tests
+
+data class ProtectionTestCase(
+    val id: String,
+    val scenario: String,
+    val inputDescription: String,
+    val expectedBehaviour: String
+)
+
+object WebsiteProtectionTestCases {
+
+    val cases = listOf(
+        ProtectionTestCase(
+            id = "WP-001",
+            scenario = "Clean website",
+            inputDescription = "Completed scan with no threat indicators",
+            expectedBehaviour = "High security score, low risk, no threat warnings"
+        ),
+        ProtectionTestCase(
+            id = "WP-002",
+            scenario = "Phishing detected",
+            inputDescription = "Scanner reports a high-severity phishing indicator",
+            expectedBehaviour = "Score decreases and phishing explanation is displayed"
+        ),
+        ProtectionTestCase(
+            id = "WP-003",
+            scenario = "Multiple threats",
+            inputDescription = "Scanner reports phishing and suspicious redirects",
+            expectedBehaviour = "Both threats are explained and precautions are provided"
+        ),
+        ProtectionTestCase(
+            id = "WP-004",
+            scenario = "Critical threat",
+            inputDescription = "Scanner reports a critical malware indicator",
+            expectedBehaviour = "Critical risk is shown with urgent safety advice"
+        ),
+        ProtectionTestCase(
+            id = "WP-005",
+            scenario = "Incomplete scan",
+            inputDescription = "Scanner returns a partial scan result",
+            expectedBehaviour = "No misleading final safety score; result is marked incomplete"
+        ),
+        ProtectionTestCase(
+            id = "WP-006",
+            scenario = "Failed scan",
+            inputDescription = "Scanner reports that the scan failed",
+            expectedBehaviour = "Score is unavailable and the user is told the scan failed"
+        ),
+        ProtectionTestCase(
+            id = "WP-007",
+            scenario = "Password already submitted",
+            inputDescription = "User submitted a password on the suspicious website",
+            expectedBehaviour = "Advice includes changing the password and securing the account"
+        ),
+        ProtectionTestCase(
+            id = "WP-008",
+            scenario = "OTP already submitted",
+            inputDescription = "User submitted an OTP on the suspicious website",
+            expectedBehaviour = "Advice tells the user to contact the relevant bank or service immediately"
+        ),
+        ProtectionTestCase(
+            id = "WP-009",
+            scenario = "Payment information submitted",
+            inputDescription = "User entered payment details on the suspicious website",
+            expectedBehaviour = "Advice includes contacting the bank or payment provider"
+        ),
+        ProtectionTestCase(
+            id = "WP-010",
+            scenario = "Simple Mode",
+            inputDescription = "Protection result is displayed in SIMPLE mode",
+            expectedBehaviour = "Clear, non-technical explanation and easy precautions"
+        ),
+        ProtectionTestCase(
+            id = "WP-011",
+            scenario = "Advanced Mode",
+            inputDescription = "Protection result is displayed in ADVANCED mode",
+            expectedBehaviour = "Score, risk level, technical reasons and threat breakdown are shown"
+        ),
+        ProtectionTestCase(
+            id = "WP-012",
+            scenario = "Duplicate evidence",
+            inputDescription = "Scanner provides repeated evidence with the same evidence ID",
+            expectedBehaviour = "Duplicate evidence does not create repeated explanations"
+        )
+    )
+}
+
